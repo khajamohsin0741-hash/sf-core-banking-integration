@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  static-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
+      - name: Pure JavaScript tests (no Salesforce org needed)
+        run: npm run test:pure
+      - name: Salesforce Code Analyzer (PMD rules for Apex)
+        run: |
+          npm install --global @salesforce/cli
+          sf plugins install code-analyzer
+          sf code-analyzer run --rule-selector pmd:Recommended --workspace force-app --severity-threshold 2
+
+  mock-api-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint OpenAPI contract
+        run: npx --yes @redocly/cli@1 lint mock-core-banking-api/openapi.yaml
+      - name: Build mock API image
+        run: docker build -t mock-core-banking-api ./mock-core-banking-api
+      - name: Smoke test container
+        run: |
+          docker run -d --name mockapi -p 8080:8080 -e MOCK_API_TOKEN=ci-only-token mock-core-banking-api
+          for i in $(seq 1 20); do curl -fs http://localhost:8080/health && break; sleep 1; done
+          test "$(curl -s -o /dev/null -w '%{http_code}' -H 'Authorization: Bearer ci-only-token' http://localhost:8080/v1/accounts/100200300400/balance)" = "200"
+          docker rm -f mockapi
+
+  apex-tests:
+    # Runs only when a Dev Hub auth URL is stored as a repository secret.
+    # Create it locally with:  sf org display --verbose --target-org <devhub>  (copy "Sfdx Auth Url")
+    runs-on: ubuntu-latest
+    needs: static-checks
+    env:
+      SFDX_AUTH_URL: ${{ secrets.DEVHUB_SFDX_AUTH_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.SFDX_AUTH_URL != ''
+      - name: Install Salesforce CLI
+        if: env.SFDX_AUTH_URL != ''
+        run: npm install --global @salesforce/cli
+      - name: Authenticate Dev Hub
+        if: env.SFDX_AUTH_URL != ''
+        run: |
+          echo "$SFDX_AUTH_URL" > ./authurl.txt
+          sf org login sfdx-url --sfdx-url-file ./authurl.txt --alias devhub --set-default-dev-hub
+          rm ./authurl.txt
+      - name: Create scratch org, deploy and run Apex tests
+        if: env.SFDX_AUTH_URL != ''
+        run: |
+          sf org create scratch --definition-file config/project-scratch-def.json --alias ci --duration-days 1 --wait 15 --set-default
+          sf project deploy start --wait 20
+          sf apex run test --test-level RunLocalTests --code-coverage --result-format human --wait 20
+      - name: Delete scratch org
+        if: always() && env.SFDX_AUTH_URL != ''
+        run: sf org delete scratch --target-org ci --no-prompt
