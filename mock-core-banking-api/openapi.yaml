@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Mock Core Banking API
+  version: 1.1.0
+  description: >
+    Synthetic core banking API used to exercise the Salesforce CoreBankingClient end to end.
+    All data is fictitious. Not modeled on any real vendor API.
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:8080
+    description: Local Docker container
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Liveness check
+      security: []
+      responses:
+        '200':
+          description: Service is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+  /v1/accounts/{accountNumber}/balance:
+    get:
+      summary: Get the current balance of an account
+      operationId: getAccountBalance
+      parameters:
+        - name: accountNumber
+          in: path
+          required: true
+          description: 6 to 17 digit account number
+          schema:
+            type: string
+            pattern: '^[0-9]{6,17}$'
+        - name: X-Correlation-Id
+          in: header
+          required: false
+          description: Caller-supplied trace id, echoed back in the response header
+          schema:
+            type: string
+        - name: simulate
+          in: query
+          required: false
+          description: Force a 4xx/5xx status to demonstrate client retry handling
+          schema:
+            type: string
+            pattern: '^[45][0-9]{2}$'
+      responses:
+        '200':
+          description: Balance found
+          headers:
+            X-Correlation-Id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBalance'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/Error'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+  schemas:
+    AccountBalance:
+      type: object
+      required: [accountNumber, availableBalance, ledgerBalance, currency, asOf]
+      properties:
+        accountNumber:
+          type: string
+          example: '100200300400'
+        availableBalance:
+          type: number
+          example: 2543.18
+        ledgerBalance:
+          type: number
+          example: 2600.0
+        currency:
+          type: string
+          example: USD
+        asOf:
+          type: string
+          format: date-time
+          example: '2026-10-01T14:30:00Z'
