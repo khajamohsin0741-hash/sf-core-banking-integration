@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <description>Published when a core banking callout fails after retries. Subscribe with a Flow or trigger to alert or log.</description>
+    <eventType>HighVolume</eventType>
+    <label>Integration Error</label>
+    <pluralLabel>Integration Errors</pluralLabel>
+    <publishBehavior>PublishImmediately</publishBehavior>
+</CustomObject>
