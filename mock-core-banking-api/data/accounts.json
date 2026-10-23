@@ -1,0 +1,5 @@
+[
+  { "accountNumber": "100200300400", "availableBalance": 2543.18, "ledgerBalance": 2600.0, "currency": "USD" },
+  { "accountNumber": "100200300401", "availableBalance": 98210.55, "ledgerBalance": 98210.55, "currency": "USD" },
+  { "accountNumber": "100200300402", "availableBalance": 0.0, "ledgerBalance": -45.2, "currency": "USD" }
+]
