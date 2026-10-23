@@ -1,0 +1,17 @@
+# Salesforce
+.sf/
+.sfdx/
+.localdevserver/
+deploy-options.json
+# Node
+node_modules/
+coverage/
+npm-debug.log*
+# Secrets and local config
+.env
+*.key
+authurl.txt
+# OS / IDE
+.DS_Store
+.vscode/settings.json
+.idea/
