@@ -1,0 +1,17 @@
+{
+  "name": "sf-core-banking-integration",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Resilient Apex REST integration pattern with Named Credentials, retries, correlation IDs and Platform Event error logging, plus a Dockerized mock API.",
+  "license": "MIT",
+  "scripts": {
+    "prettier": "prettier --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
+    "prettier:verify": "prettier --check \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
+    "test:pure": "node --test scripts/*.test.mjs"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "prettier-plugin-apex": "^2.1.4",
+    "@prettier/plugin-xml": "^3.4.1"
+  }
+}
