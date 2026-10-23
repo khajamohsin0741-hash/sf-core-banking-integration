@@ -1,0 +1,22 @@
+{
+  "trailingComma": "none",
+  "printWidth": 100,
+  "overrides": [
+    {
+      "files": "**/lwc/**/*.html",
+      "options": {
+        "parser": "lwc"
+      }
+    },
+    {
+      "files": "*.{cmp,page,component}",
+      "options": {
+        "parser": "html"
+      }
+    }
+  ],
+  "plugins": [
+    "prettier-plugin-apex",
+    "@prettier/plugin-xml"
+  ]
+}
