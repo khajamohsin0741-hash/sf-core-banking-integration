@@ -12,7 +12,7 @@ jobs:
   static-checks:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -28,7 +28,7 @@ jobs:
   mock-api-docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Lint OpenAPI contract
         run: npx --yes @redocly/cli@1 lint mock-core-banking-api/openapi.yaml
       - name: Build mock API image
@@ -48,7 +48,7 @@ jobs:
     env:
       SFDX_AUTH_URL: ${{ secrets.DEVHUB_SFDX_AUTH_URL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         if: env.SFDX_AUTH_URL != ''
       - name: Install Salesforce CLI
         if: env.SFDX_AUTH_URL != ''
